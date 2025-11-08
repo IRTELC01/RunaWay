@@ -24,7 +24,7 @@ services:
     branch: main
     rootDir: client
     buildCommand: npm ci && npm run build
-    publishPath: dist
+    staticPublishPath: dist
     autoDeploy: true
     envVars:
       # VITE_API_URL se tomará de la URL del backend; el cliente añade /api si falta
