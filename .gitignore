@@ -1,0 +1,11 @@
+# Root
+node_modules/
+dist/
+.DS_Store
+
+# Server
+server/.env
+server/runaway.db*
+
+# Client build
+client/dist/

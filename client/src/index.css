@@ -1,0 +1,51 @@
+@import "tailwindcss";
+
+/* Tailwind v4: definir tokens de color personalizados */
+@theme {
+  --color-neon-pink: #ff3cac;
+  --color-neon-blue: #784ba0;
+  --color-neon-cyan: #2b86c5;
+  --color-neon-green: #39ff14;
+  --color-neon-yellow: #faff00;
+}
+
+html, body, #root {
+  height: 100%;
+}
+
+.bg-future {
+  background: linear-gradient(135deg, #0f0f1a 0%, #12122b 60%, #0c1b2d 100%);
+}
+
+.card-float {
+  @apply relative overflow-hidden rounded-xl border border-neon-green backdrop-blur bg-white/8 transition-transform hover:-translate-y-1 hover:border-neon-green;
+  box-shadow: 0 0 24px rgba(57,255,20,0.35), inset 0 0 12px rgba(255,60,172,0.45);
+}
+
+.neon-text {
+  text-shadow: 0 0 8px rgba(255,60,172,0.6), 0 0 18px rgba(43,134,197,0.6);
+}
+
+.badge-neon {
+  @apply inline-flex items-center gap-1 px-3 py-1 text-xs rounded-full border transition-colors;
+  background-color: rgba(0,0,0,0.30);
+  border-color: rgba(57,255,20,0.6);
+  color: #faff00;
+}
+.badge-neon:hover {
+  background-color: rgba(0,0,0,0.40);
+}
+
+/* Título verde neón con glow y animación de flotado */
+.neon-title-green {
+  color: var(--color-neon-green);
+  text-shadow: 0 0 6px rgba(57,255,20,0.9),
+               0 0 12px rgba(57,255,20,0.7),
+               0 0 24px rgba(57,255,20,0.5);
+  animation: neonFloat 3s ease-in-out infinite;
+}
+
+@keyframes neonFloat {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-4px); }
+}
