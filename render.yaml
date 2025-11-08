@@ -8,6 +8,7 @@ services:
     buildCommand: npm ci
     startCommand: npm start
     healthCheckPath: /
+    plan: free
     autoDeploy: true
     envVars:
       - key: JWT_SECRET
@@ -25,6 +26,7 @@ services:
     rootDir: client
     buildCommand: npm ci && npm run build
     staticPublishPath: dist
+    plan: free
     autoDeploy: true
     routes:
       - type: rewrite
