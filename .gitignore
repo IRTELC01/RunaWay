@@ -9,3 +9,7 @@ server/runaway.db*
 
 # Client build
 client/dist/
+client/.env*
+
+# General
+*.log
