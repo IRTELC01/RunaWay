@@ -1,4 +1,5 @@
-import { BrowserRouter, Routes, Route, Link } from 'react-router-dom'
+import { BrowserRouter, Routes, Route, Link, Navigate } from 'react-router-dom'
+import { useEffect } from 'react'
 import './index.css'
 
 import Landing from './pages/Landing'
@@ -7,6 +8,7 @@ import Register from './pages/Register'
 import Setup2FA from './pages/Setup2FA'
 import Dashboard from './pages/Dashboard'
 import LoginPhone from './pages/LoginPhone'
+import { login, register, setToken } from './api'
 
 function Navbar() {
   return (
@@ -24,7 +26,6 @@ function Navbar() {
         <nav className="flex gap-4 text-sm text-white/90">
           <Link to="/" className="hover:text-white">Inicio</Link>
           <Link to="/login" className="hover:text-white">Acceso Taller</Link>
-          <Link to="/dashboard" className="hover:text-white">Dashboard</Link>
         </nav>
       </div>
     </header>
@@ -46,6 +47,27 @@ function Footer() {
 }
 
 export default function App() {
+  // Auto-login global: si no hay token, intenta admin/runaway123 y registra si hace falta
+  useEffect(() => {
+    const run = async () => {
+      // En producción no hacemos auto-login para evitar accesos no deseados
+      if (import.meta.env.PROD) return
+      const hasToken = !!localStorage.getItem('runaway_token')
+      if (hasToken) return
+      try {
+        let r = await login('admin', 'runaway123', '')
+        if (!r.token) { await register('admin', 'runaway123'); r = await login('admin', 'runaway123', '') }
+        if (r.token) { setToken(r.token) }
+      } catch {}
+    }
+    run()
+  }, [])
+
+  function RequireAuth({ children }) {
+    const token = localStorage.getItem('runaway_token')
+    if (!token) return <Navigate to="/login" replace />
+    return children
+  }
   return (
     <BrowserRouter>
       <div className="min-h-screen bg-future text-white">
@@ -56,7 +78,7 @@ export default function App() {
           <Route path="/login-phone" element={<LoginPhone />} />
           <Route path="/register" element={<Register />} />
           <Route path="/setup-2fa" element={<Setup2FA />} />
-          <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/dashboard" element={<RequireAuth><Dashboard /></RequireAuth>} />
         </Routes>
         <Footer />
         {/* Botón flotante de WhatsApp: número real del taller */}

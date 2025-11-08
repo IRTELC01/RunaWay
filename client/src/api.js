@@ -1,5 +1,10 @@
-// Permite configurar la URL del API vía variable de entorno en despliegue
-const API_URL = (import.meta.env.VITE_API_URL || 'http://localhost:3001/api');
+// Permite configurar la URL del API vía variable de entorno en despliegue.
+// Si VITE_API_URL no incluye "/api", se agrega automáticamente.
+let API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:3001/api'
+if (!/\/api\/?$/.test(API_BASE)) {
+  API_BASE = API_BASE.replace(/\/+$/, '') + '/api'
+}
+const API_URL = API_BASE
 
 export async function register(username, password) {
   const r = await fetch(`${API_URL}/auth/register`, {

@@ -1,0 +1,34 @@
+services:
+  - type: web
+    name: runaway-api
+    env: node
+    repo: https://github.com/IRTELC01/RunaWay.git
+    branch: main
+    rootDir: server
+    buildCommand: npm ci
+    startCommand: npm start
+    healthCheckPath: /
+    autoDeploy: true
+    envVars:
+      - key: JWT_SECRET
+        sync: false
+      - key: DEFAULT_ADMIN_PASSWORD
+        value: runaway123
+      - key: FRONTEND_ORIGIN
+        sync: false
+
+  - type: static_site
+    name: runaway-web
+    repo: https://github.com/IRTELC01/RunaWay.git
+    branch: main
+    rootDir: client
+    buildCommand: npm ci && npm run build
+    publishPath: dist
+    autoDeploy: true
+    envVars:
+      # VITE_API_URL se tomará de la URL del backend; el cliente añade /api si falta
+      - key: VITE_API_URL
+        fromService:
+          name: runaway-api
+          type: web
+          property: url
