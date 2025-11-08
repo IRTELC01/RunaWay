@@ -26,10 +26,7 @@ services:
     buildCommand: npm ci && npm run build
     staticPublishPath: dist
     autoDeploy: true
-    envVars:
-      # VITE_API_URL se tomará de la URL del backend; el cliente añade /api si falta
-      - key: VITE_API_URL
-        fromService:
-          name: runaway-api
-          type: web
-          property: url
+    routes:
+      - type: rewrite
+        source: /api/*
+        destination: https://${runaway-api.publicHost}/api/*
