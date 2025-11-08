@@ -17,7 +17,7 @@ services:
       - key: FRONTEND_ORIGIN
         sync: false
 
-  - type: static_site
+  - type: static
     name: runaway-web
     repo: https://github.com/IRTELC01/RunaWay.git
     branch: main
