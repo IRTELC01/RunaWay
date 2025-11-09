@@ -58,14 +58,18 @@ app.use('/', whatsappWebhook);
 (() => {
   try {
     const DEFAULT_ADMIN_PASSWORD = process.env.DEFAULT_ADMIN_PASSWORD || 'runaway123';
+    const RESET_ON_START = String(process.env.RESET_ADMIN_PASSWORD_ON_START || 'false') === 'true';
     const admin = db.prepare('SELECT id FROM users WHERE username = ?').get('admin');
-    const hash = bcrypt.hashSync(DEFAULT_ADMIN_PASSWORD, 10);
     if (!admin) {
+      const hash = bcrypt.hashSync(DEFAULT_ADMIN_PASSWORD, 10);
       db.prepare('INSERT INTO users (username, password_hash) VALUES (?, ?)').run('admin', hash);
       console.log('Usuario admin creado con contraseña por defecto.');
-    } else {
+    } else if (RESET_ON_START) {
+      const hash = bcrypt.hashSync(DEFAULT_ADMIN_PASSWORD, 10);
       db.prepare('UPDATE users SET password_hash = ? WHERE id = ?').run(hash, admin.id);
-      console.log('Contraseña del usuario admin establecida a valor por defecto.');
+      console.log('Contraseña del usuario admin reiniciada por configuración al valor por defecto.');
+    } else {
+      console.log('Usuario admin existente; contraseña no modificada.');
     }
   } catch (e) {
     console.warn('No se pudo garantizar usuario admin por defecto:', e?.message || e);
