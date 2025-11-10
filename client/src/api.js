@@ -6,6 +6,19 @@ if (!/\/api\/?$/.test(API_BASE)) {
 }
 const API_URL = API_BASE
 
+// Helper: manejar 401 borrando token y redirigiendo a /login
+async function jsonWithAuth(response) {
+  if (response.status === 401) {
+    try { localStorage.removeItem('runaway_token') } catch {}
+    // Intentar leer mensaje de error, pero no bloquear si falla
+    let body = null
+    try { body = await response.json() } catch {}
+    try { window.location.href = '/login' } catch {}
+    return body || { error: 'No autorizado' }
+  }
+  return response.json()
+}
+
 export async function register(username, password) {
   const r = await fetch(`${API_URL}/auth/register`, {
     method: 'POST', headers: { 'Content-Type': 'application/json' },
@@ -64,14 +77,14 @@ export async function createInvoice(payload) {
       Authorization: `Bearer ${getToken()}`,
     }, body: JSON.stringify(payload),
   });
-  return r.json();
+  return jsonWithAuth(r);
 }
 
 export async function listInvoices() {
   const r = await fetch(`${API_URL}/invoices`, {
     headers: { Authorization: `Bearer ${getToken()}` },
   });
-  return r.json();
+  return jsonWithAuth(r);
 }
 
 export async function addTransaction(payload) {
@@ -81,12 +94,12 @@ export async function addTransaction(payload) {
       Authorization: `Bearer ${getToken()}`,
     }, body: JSON.stringify(payload),
   });
-  return r.json();
+  return jsonWithAuth(r);
 }
 
 export async function getSummary() {
   const r = await fetch(`${API_URL}/accounting/summary`, {
     headers: { Authorization: `Bearer ${getToken()}` },
   });
-  return r.json();
+  return jsonWithAuth(r);
 }
