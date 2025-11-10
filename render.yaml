@@ -30,11 +30,8 @@ services:
     autoDeploy: true
     envVars:
       - key: VITE_API_URL
-        value: /api
+        value: https://${runawayla84-api.publicHost}/api
     routes:
-      - type: rewrite
-        source: /api/*
-        destination: https://${runawayla84-api.publicHost}/api/*
       # SPA: reescribir todas las rutas a index.html para soportar react-router
       - type: rewrite
         source: /*
