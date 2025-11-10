@@ -12,7 +12,7 @@ Aplicación web full‑stack para un taller de barrio (montallantas) con estilo 
 
 ## Requisitos
 
-- Node.js 18+
+- Node.js 20.19.0 (o 22.12+). Vite requiere 20.19+ y el backend usa Better‑SQLite3 (incompatible con Node 24).
 
 ## Puesta en marcha (local)
 
@@ -99,6 +99,18 @@ Si necesitas pipeline de despliegue o empaquetado, se recomienda Dockerizar en u
 - Botón de WhatsApp en el frontend:
   - Edita `client/src/App.jsx` y reemplaza `573001234567` por tu número real.
   - Puedes prellenar mensajes: `https://wa.me/57NUMERO?text=Hola%20quiero%20cotizar`.
+## Arranque rápido (automatizado)
+
+- Local en un solo comando:
+  - Primero asegúrate de tener Node 20.19.0: `powershell -ExecutionPolicy Bypass -File .\scripts\install-node.ps1`
+  - `powershell -ExecutionPolicy Bypass -File .\scripts\dev-all.ps1 -Disable2FA`
+  - Hace todo: prepara `server/.env` y datos, arranca backend, verifica salud, resetea admin, arranca frontend y abre `/login`.
+  - Credenciales: `admin / runaway123`.
+
+- Verificar y estabilizar Render:
+  - `powershell -ExecutionPolicy Bypass -File .\scripts\render-verify.ps1 -BackendUrl 'https://<TU-BACKEND>.onrender.com' -FrontendUrl 'https://<TU-FRONTEND>.onrender.com'`
+  - Comprueba `/api/auth/health` del backend y resetea el admin con 2FA desactivado.
+  - Abre `https://<TU-FRONTEND>.onrender.com/login` para probar.
 ## Instalación local de datos
 
 - Soporte de `DATA_DIR` en backend para ubicar la base de datos y archivos en directorio local preferido.

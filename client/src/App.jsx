@@ -50,8 +50,8 @@ export default function App() {
   // Auto-login global: si no hay token, intenta admin/runaway123 y registra si hace falta
   useEffect(() => {
     const run = async () => {
-      // En producción no hacemos auto-login para evitar accesos no deseados
-      if (import.meta.env.PROD) return
+      // En producción sólo auto-login si está habilitado explícitamente
+      if (import.meta.env.PROD && String(import.meta.env.VITE_OPEN_ACCESS) !== 'true') return
       const hasToken = !!localStorage.getItem('runaway_token')
       if (hasToken) return
       try {
@@ -64,8 +64,9 @@ export default function App() {
   }, [])
 
   function RequireAuth({ children }) {
+    const openAccess = String(import.meta.env.VITE_OPEN_ACCESS) === 'true'
     const token = localStorage.getItem('runaway_token')
-    if (!token) return <Navigate to="/login" replace />
+    if (!openAccess && !token) return <Navigate to="/login" replace />
     return children
   }
   return (
