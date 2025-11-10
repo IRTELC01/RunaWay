@@ -40,7 +40,9 @@ app.use(cors({
   credentials: true,
 }));
 // Preflight explícito para asegurar respuesta de CORS en Render
-app.options('*', cors({
+// Nota: evitar '*' porque path-to-regexp en algunas versiones lo rechaza.
+// Usamos un RegExp que matchea cualquier ruta para OPTIONS.
+app.options(/.*/, cors({
   origin: (origin, callback) => {
     if (OPEN_ACCESS) return callback(null, true);
     if (!origin) return callback(null, true);
@@ -69,7 +71,8 @@ const limiter = rateLimit({
   windowMs: 15 * 60 * 1000,
   max: 200,
 });
-app.use(limiter);
+// Aplicar limitador solo a rutas de API para no afectar health checks
+app.use('/api', limiter);
 
 app.get('/', (req, res) => {
   res.json({ status: 'ok', app: 'RunaWay API' });
