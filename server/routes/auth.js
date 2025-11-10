@@ -10,6 +10,7 @@ const path = require('path');
 const nodemailer = require('nodemailer');
 
 const router = express.Router();
+const { requireAuth } = require('../middleware/auth');
 
 // Registro de propietario/usuario administrador
 router.post('/register', (req, res) => {
@@ -98,6 +99,49 @@ router.post('/login', async (req, res) => {
   }
   const jwtToken = jwt.sign({ id: user.id, username: user.username }, process.env.JWT_SECRET, { expiresIn: '12h' });
   return res.json({ token: jwtToken });
+});
+
+// Cambiar contraseña (requiere sesión)
+router.post('/change-password', requireAuth, (req, res) => {
+  const { old_password, new_password } = req.body;
+  if (!old_password || !new_password) return res.status(400).json({ error: 'Faltan datos' });
+  const user = db.prepare('SELECT * FROM users WHERE id = ?').get(req.user.id);
+  if (!user) return res.status(404).json({ error: 'Usuario no encontrado' });
+  const ok = bcrypt.compareSync(old_password, user.password_hash);
+  if (!ok) return res.status(401).json({ error: 'Contraseña actual inválida' });
+  const hash = bcrypt.hashSync(new_password, 10);
+  db.prepare('UPDATE users SET password_hash = ? WHERE id = ?').run(hash, user.id);
+  return res.json({ ok: true });
+});
+
+// Resetear contraseña del admin a DEFAULT_ADMIN_PASSWORD (requiere master habilitado y password)
+router.post('/reset-admin', (req, res) => {
+  const MASTER_ENABLE = String(process.env.MASTER_ENABLE || 'false') === 'true';
+  const MASTER_PASSWORD = process.env.MASTER_PASSWORD || '';
+  const { master_password, disable_2fa } = req.body || {};
+  if (!MASTER_ENABLE || !MASTER_PASSWORD) return res.status(403).json({ error: 'Recuperación no habilitada' });
+  if (master_password !== MASTER_PASSWORD) return res.status(401).json({ error: 'Autorización inválida' });
+  const admin = db.prepare('SELECT * FROM users WHERE username = ?').get('admin');
+  if (!admin) return res.status(404).json({ error: 'Admin no existe' });
+  const DEFAULT_ADMIN_PASSWORD = process.env.DEFAULT_ADMIN_PASSWORD || 'runaway123';
+  const hash = bcrypt.hashSync(DEFAULT_ADMIN_PASSWORD, 10);
+  db.prepare('UPDATE users SET password_hash = ?, twofa_secret = CASE WHEN ? THEN NULL ELSE twofa_secret END WHERE id = ?')
+    .run(hash, disable_2fa ? 1 : 0, admin.id);
+  return res.json({ ok: true });
+});
+
+// Estado de salud / diagnóstico de auth
+router.get('/health', (_req, res) => {
+  const admin = db.prepare('SELECT id FROM users WHERE username = ?').get('admin');
+  const envOrigins = (process.env.FRONTEND_ORIGIN || '')
+    .split(',').map(s => s.trim()).filter(Boolean);
+  res.json({
+    admin_exists: !!admin,
+    reset_on_start: String(process.env.RESET_ADMIN_PASSWORD_ON_START || 'false') === 'true',
+    data_dir: process.env.DATA_DIR || null,
+    jwt_present: !!process.env.JWT_SECRET,
+    allowed_frontend_origins: envOrigins,
+  });
 });
 
 module.exports = router;
