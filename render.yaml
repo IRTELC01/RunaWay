@@ -1,6 +1,6 @@
 services:
   - type: web
-    name: runaway-api
+    name: runawayla84-api
     env: node
     repo: https://github.com/IRTELC01/RunaWay.git
     branch: main
@@ -20,7 +20,7 @@ services:
 
   - type: web
     runtime: static
-    name: runaway-web
+    name: runawayla84
     repo: https://github.com/IRTELC01/RunaWay.git
     branch: main
     rootDir: client
@@ -34,7 +34,7 @@ services:
     routes:
       - type: rewrite
         source: /api/*
-        destination: https://${runaway-api.publicHost}/api/*
+        destination: https://${runawayla84-api.publicHost}/api/*
       # SPA: reescribir todas las rutas a index.html para soportar react-router
       - type: rewrite
         source: /*
